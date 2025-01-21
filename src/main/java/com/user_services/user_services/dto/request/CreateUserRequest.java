@@ -3,6 +3,7 @@ package com.user_services.user_services.dto.request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.user_services.user_services.enums.CommunicationPreference;
 import com.user_services.user_services.enums.Gender;
+import com.user_services.user_services.validator.MinAge;
 import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
