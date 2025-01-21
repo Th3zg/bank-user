@@ -1,4 +1,4 @@
-package com.bank.customer.customer_service.services.interfaces;
+package com.user_services.user_services.services.interfaces;
 
 import com.user_services.user_services.dto.request.CreateUserRequest;
 import com.user_services.user_services.util.Result;
