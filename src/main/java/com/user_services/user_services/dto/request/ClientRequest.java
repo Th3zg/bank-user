@@ -1,6 +1,7 @@
 package com.user_services.user_services.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.user_services.user_services.enums.RiskLevel;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
