@@ -1,4 +1,4 @@
-package com.bank.customer.customer_service.model;
+package com.user_services.user_services.model;
 
 import com.user_services.user_services.enums.RiskLevel;
 
