@@ -1,7 +1,7 @@
 package com.user_services.user_services.services;
 
-import com.user_services.user_services.dto.request.CreateUserRequest;
-import com.user_services.user_services.model.Person;
+import com.user_services.user_services.command.CreateUserCommand;
+import com.user_services.user_services.domain.Person;
 import com.user_services.user_services.repositories.PersonRepositoryImpl;
 import com.user_services.user_services.services.interfaces.UserServices;
 import com.user_services.user_services.util.Result;
@@ -39,7 +39,7 @@ public class UserServicesImpl implements UserServices {
   }
 
   @Override
-  public Result<Void> createUser(CreateUserRequest request) {
+  public Result<Void> createUser(CreateUserCommand request) {
     return transactionTemplate.execute(status -> {
       Person person = new Person.Builder()
               .setFirstName(request.firstName())

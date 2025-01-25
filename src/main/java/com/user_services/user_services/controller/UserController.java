@@ -1,8 +1,10 @@
 package com.user_services.user_services.controller;
 
+import com.user_services.user_services.command.CreateUserCommand;
 import com.user_services.user_services.dto.request.CreateUserRequest;
 import com.user_services.user_services.services.UserServicesImpl;
 import com.user_services.user_services.util.Result;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +36,7 @@ public class UserController {
 //    }
 
   @PostMapping
-  public ResponseEntity<?> createCustomer(@RequestBody CreateUserRequest request) {
+  public ResponseEntity<?> createCustomer(@RequestBody @Valid CreateUserCommand request) {
     logger.info("solicitud recibida: {}", request);
 
     Result<Void> response = customerServices.createUser(request);

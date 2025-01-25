@@ -1,6 +1,6 @@
 package com.user_services.user_services.repositories;
 
-import com.user_services.user_services.model.Person;
+import com.user_services.user_services.domain.Person;
 import com.user_services.user_services.repositories.interfaces.PersonRepository;
 import io.vavr.control.Try;
 import org.slf4j.Logger;

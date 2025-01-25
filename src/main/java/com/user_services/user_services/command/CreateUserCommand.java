@@ -41,7 +41,7 @@ public record CreateUserCommand(
 
         @JsonProperty("communication_preference") CommunicationPreference communicationPreference,
 
-        @NotBlank(message = "Terms is required")
+        @AssertTrue(message = "You must accept the terms")
         @JsonProperty("terms_accepted") boolean termsAccepted,
 
         @JsonProperty("tow_factor_enable") boolean twoFactorEnabled,
