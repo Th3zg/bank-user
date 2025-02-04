@@ -1,4 +1,4 @@
-package com.user_services.user_services.domain;
+package com.user_services.user_services.model;
 
 import com.user_services.user_services.enums.RiskLevel;
 
@@ -10,11 +10,14 @@ public final class Client {
   private final String accountNumber;
   private final BigDecimal accountBalance;
   private final BigDecimal overdraftLimit;
-  private final com.user_services.user_services.enums.RiskLevel riskLevel;
+  private final RiskLevel riskLevel;
   private final BigDecimal creditScore;
   private final BigDecimal totalLoans;
   private final BigDecimal totalInvestments;
   private final BigDecimal totalInsurance;
+  private final BigDecimal monthlyIncome;
+  private final String occupation;
+  private final String maritalStatus;
 
   public Client(Builder builder) {
     this.id = builder.id;
@@ -27,6 +30,9 @@ public final class Client {
     this.totalLoans = builder.totalLoans;
     this.totalInvestments = builder.totalInvestments;
     this.totalInsurance = builder.totalInsurance;
+    this.monthlyIncome = builder.monthlyIncome;
+    this.occupation = builder.occupation;
+    this.maritalStatus = builder.maritalStatus;
   }
 
   public static class Builder {
@@ -40,6 +46,9 @@ public final class Client {
     private BigDecimal totalLoans;
     private BigDecimal totalInvestments;
     private BigDecimal totalInsurance;
+    private BigDecimal monthlyIncome;
+    private String occupation;
+    private String maritalStatus;
 
     public Builder setId(Long id) { this.id = id; return this; }
     public Builder setPersonId(Long personId) { this.personId = personId; return this; }
@@ -51,20 +60,12 @@ public final class Client {
     public Builder setTotalLoans(BigDecimal totalLoans) { this.totalLoans = totalLoans; return this; }
     public Builder setTotalInvestments(BigDecimal totalInvestments) { this.totalInvestments = totalInvestments; return this; }
     public Builder setTotalInsurance(BigDecimal totalInsurance) { this.totalInsurance = totalInsurance; return this; }
+    public Builder setMonthlyIncome(BigDecimal monthlyIncome) { this.monthlyIncome = monthlyIncome; return this; }
+    public Builder setOccupation(String occupation) { this.occupation = occupation; return this; }
+    public Builder setMaritalStatus(String maritalStatus) { this.maritalStatus  = maritalStatus; return this; }
 
     public Client build() {
       return new Client(this);
     }
   }
-
-  public Long getId() { return id; }
-  public Long getPersonId() { return personId; }
-  public String getAccountNumber() { return accountNumber; }
-  public BigDecimal getAccountBalance() { return accountBalance; }
-  public BigDecimal getOverdraftLimit() { return overdraftLimit; }
-  public RiskLevel getRiskLevel() { return riskLevel; }
-  public BigDecimal getCreditScore() { return creditScore; }
-  public BigDecimal getTotalLoans() { return totalLoans; }
-  public BigDecimal getTotalInvestments() { return totalInvestments; }
-  public BigDecimal getTotalInsurance() { return totalInsurance; }
 }
