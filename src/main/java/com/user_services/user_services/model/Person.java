@@ -1,11 +1,13 @@
-package com.user_services.user_services.domain;
+package com.user_services.user_services.model;
 
 import com.user_services.user_services.enums.CommunicationPreference;
 import com.user_services.user_services.enums.Gender;
+import lombok.Getter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Getter
 public final class Person {
   private final Long id;
   private final String firstName;
@@ -16,6 +18,7 @@ public final class Person {
   private final Gender gender;
   private final String profileImageUrl;
   private final CommunicationPreference communicationPreference;
+  private final boolean terms_accepted;
   private final String bio;
   private final LocalDateTime createdAt;
   private final LocalDateTime updatedAt;
@@ -30,6 +33,7 @@ public final class Person {
     this.gender = builder.gender;
     this.profileImageUrl = builder.profileImageUrl;
     this.communicationPreference = builder.communicationPreference;
+    this.terms_accepted = builder.terms_accepted;
     this.bio = builder.bio;
     this.createdAt = builder.createdAt;
     this.updatedAt = builder.updatedAt;
@@ -45,6 +49,7 @@ public final class Person {
     private Gender gender;
     private String profileImageUrl;
     private CommunicationPreference communicationPreference;
+    private boolean terms_accepted;
     private String bio;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -58,6 +63,7 @@ public final class Person {
     public Builder setGender(Gender gender) { this.gender = gender; return this; }
     public Builder setProfileImageUrl(String profileImageUrl) { this.profileImageUrl = profileImageUrl; return this; }
     public Builder setCommunicationPreference(CommunicationPreference communicationPreference) { this.communicationPreference = communicationPreference; return this; }
+    public Builder setTerms_accepted(boolean terms_accepted) { this.terms_accepted = terms_accepted; return this; }
     public Builder setBio(String bio) { this.bio = bio; return this; }
     public Builder setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; return this; }
     public Builder setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; return this; }
@@ -66,17 +72,4 @@ public final class Person {
       return new Person(this);
     }
   }
-
-  public Long getId() { return id; }
-  public String getFirstName() { return firstName; }
-  public String getLastName() { return lastName; }
-  public LocalDate getDateBirth() { return dateBirth; }
-  public String getEmail() { return email; }
-  public String getPassword() { return password; }
-  public Gender getGender() { return gender; }
-  public String getProfileImageUrl() { return profileImageUrl; }
-  public CommunicationPreference getCommunicationPreference() { return communicationPreference; }
-  public String getBio() { return bio; }
-  public LocalDateTime getCreatedAt() { return createdAt; }
-  public LocalDateTime getUpdatedAt() { return updatedAt; }
 }
