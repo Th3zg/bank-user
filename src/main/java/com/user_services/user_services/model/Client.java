@@ -1,9 +1,11 @@
 package com.user_services.user_services.model;
 
 import com.user_services.user_services.enums.RiskLevel;
+import lombok.Getter;
 
 import java.math.BigDecimal;
 
+@Getter
 public final class Client {
   private final Long id;
   private final Long personId;
