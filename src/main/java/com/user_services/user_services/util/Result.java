@@ -11,7 +11,7 @@ public record Result<T>(T value, boolean isSuccess, Set<String> errors) {
     return new Result<>(null, true, null);
   }
 
-  public static Result<Void> failure(Set<String> errors) {
+  public static <T>  Result<T> failure(Set<String> errors) {
     return new Result<>(null, false, errors);
   }
 
