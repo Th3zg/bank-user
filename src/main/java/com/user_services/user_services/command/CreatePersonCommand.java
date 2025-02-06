@@ -1,17 +1,14 @@
 package com.user_services.user_services.command;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.user_services.user_services.dto.request.AddressRequest;
-import com.user_services.user_services.dto.request.ClientRequest;
-import com.user_services.user_services.dto.request.PhoneRequest;
 import com.user_services.user_services.enums.CommunicationPreference;
 import com.user_services.user_services.enums.Gender;
-import com.user_services.user_services.validator.MinAge;
+//import com.user_services.user_services.validator.MinAge;
 import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
 
-public record CreateUserCommand(
+public record CreatePersonCommand(
         @NotBlank(message = "First name is required")
         @Size(max = 100, message = "First name cannot exceed 50 characters")
         @JsonProperty("first_name") String firstName,
@@ -21,7 +18,7 @@ public record CreateUserCommand(
         @JsonProperty("last_name") String lastName,
 
         @NotNull(message = "Date of birth is required")
-        @MinAge(message = "Customer must be at least 18 years old")
+        //@MinAge(message = "Customer must be at least 18 years old")
         @JsonProperty("date_birth") LocalDate dateBirth,
 
         @NotBlank(message = "Email is required")
@@ -47,12 +44,12 @@ public record CreateUserCommand(
         @JsonProperty("tow_factor_enable") boolean twoFactorEnabled,
 
         @NotEmpty(message = "client is required")
-        @JsonProperty("client") ClientRequest client,
+        @JsonProperty("client") CreateClientCommand client,
 
         @NotEmpty(message = "Address is required")
-        @JsonProperty("address") AddressRequest address,
+        @JsonProperty("address") CreateAddressCommand address,
 
         @NotEmpty(message = "Phones is required")
-        @JsonProperty("phone") PhoneRequest phone
+        @JsonProperty("phone") CreatePhoneCommand phone
 ) {
 }
