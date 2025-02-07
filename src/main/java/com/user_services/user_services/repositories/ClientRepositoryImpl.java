@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 @RequiredArgsConstructor
 public class ClientRepositoryImpl implements UserRepository {
-  private final Logger logger = LoggerFactory.getLogger(PersonRepositoryImpl.class);
+  private final Logger logger = LoggerFactory.getLogger(ClientRepositoryImpl.class);
   private final JdbcTemplate jdbcTemplate;
 
   @Override
