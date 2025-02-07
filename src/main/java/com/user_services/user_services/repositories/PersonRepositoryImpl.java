@@ -19,7 +19,8 @@ public class PersonRepositoryImpl implements PersonRepository {
 
   @Override
   public Try<Long> create(Person person) {
-    String sql = "INSERT INTO persons (first_name, last_name, date_birth, email, password, gender, profile_image_url, communication_preference, terms_accepted, bio) " +
+    String sql = "INSERT INTO persons (first_name, last_name, date_birth, email, password, " +
+            "gender, profile_image_url, communication_preference, terms_accepted, bio) " +
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING person_id";
 
     return Try.of(() -> {
