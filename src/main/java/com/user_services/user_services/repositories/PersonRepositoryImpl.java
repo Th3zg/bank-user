@@ -1,11 +1,13 @@
 package com.user_services.user_services.repositories;
 
+import com.user_services.user_services.exception.DatabaseErrorExceptionMapper;
 import com.user_services.user_services.model.Person;
 import com.user_services.user_services.repositories.interfaces.PersonRepository;
 import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -37,6 +39,9 @@ public class PersonRepositoryImpl implements PersonRepository {
       );
       logger.info("Person created with ID: {}", personId);
       return personId;
-    }).onFailure(ex -> logger.error("Error creating person", ex));
+    }).onFailure(ex -> {
+      logger.error("Error creating person", ex);
+      DatabaseErrorExceptionMapper.fromException((DataAccessException) ex);
+    });
   }
 }
