@@ -1,7 +1,7 @@
 package com.user_services.user_services.repositories;
 
 import com.user_services.user_services.exception.DatabaseErrorExceptionMapper;
-import com.user_services.user_services.model.Person;
+import com.user_services.user_services.model.entity.Person;
 import com.user_services.user_services.repositories.interfaces.PersonRepository;
 import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
