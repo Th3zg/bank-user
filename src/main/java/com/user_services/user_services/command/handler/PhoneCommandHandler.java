@@ -17,7 +17,7 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class PhoneCommandHandler {
   private final Logger logger = LoggerFactory.getLogger(PhoneCommandHandler.class);
-  private final PhoneRepositoryImpl phoneRepository
+  private final PhoneRepositoryImpl phoneRepository;
   private final TransactionTemplate transactionTemplate;
 
   public Result<Void> handler(Long personId, CreatePhoneCommand command) {
