@@ -34,7 +34,7 @@ public class PersonRepositoryImpl implements PersonRepository {
               person.getPassword(),
               person.getGender().name(),
               person.getProfileImageUrl(),
-              person.getCommunicationPreference() != null ? person.getCommunicationPreference().name() : null,
+              person.getCommunicationPreference(),
               person.isTermsAccepted(),
               person.getBio()
       );
