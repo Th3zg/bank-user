@@ -2,11 +2,20 @@ package com.user_services.user_services.events;
 
 import com.user_services.user_services.enums.RiskLevel;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public record ClientCreatedEvent(
         Long clientId,
         Long personId,
+        String firstName,
+        String lastName,
+        String email,
+        LocalDate dateOfBirth,
+        String gender,
+        String profileImageUrl,
+        String communicationPreference,
+        Boolean termsAccepted,
         String accountNumber,
         BigDecimal accountBalance,
         BigDecimal overdraftLimit,
@@ -20,10 +29,18 @@ public record ClientCreatedEvent(
         String maritalStatus,
         LocalDateTime createdAt
 ) {
-  public ClientCreatedEvent(Long clientId, Long personId, String accountNumber, BigDecimal accountBalance) {
+  public ClientCreatedEvent(Long clientId, Long personId, String firstName, String lastName, String email, LocalDate dateOfBirth, String accountNumber, BigDecimal accountBalance) {
     this(
             clientId,
             personId,
+            firstName,
+            lastName,
+            email,
+            dateOfBirth,
+            "Unknown",
+            null,
+            "Email",
+            false,
             accountNumber,
             accountBalance,
             BigDecimal.ZERO,
