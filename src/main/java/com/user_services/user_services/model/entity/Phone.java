@@ -1,4 +1,4 @@
-package com.user_services.user_services.model;
+package com.user_services.user_services.model.entity;
 
 import com.user_services.user_services.enums.PhoneType;
 import lombok.Getter;
@@ -38,9 +38,6 @@ public final class Phone {
     public Builder setUpdatedAt(ZonedDateTime updatedAt) { this.updatedAt = updatedAt; return this; }
 
     public Phone build() {
-      if (personId == null || phoneNumber == null) {
-        throw new IllegalStateException("Faltan campos obligatorios para construir el teléfono.");
-      }
       return new Phone(this);
     }
   }

@@ -1,4 +1,4 @@
-package com.user_services.user_services.model;
+package com.user_services.user_services.model.entity;
 
 import com.user_services.user_services.enums.RiskLevel;
 import lombok.Getter;
