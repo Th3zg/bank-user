@@ -8,10 +8,10 @@ public record PersonCreatedEvent(
         String firstName,
         String lastName,
         String email,
-        LocalDate dateBirth,
+        LocalDate dateOfBirth,
+        String gender,
+        String profileImageUrl,
+        String communicationPreference,
+        Boolean termsAccepted,
         LocalDateTime createdAt
-) {
-  public PersonCreatedEvent(Long personId, String firstName, String lastName, String email, LocalDate dateBirth) {
-    this(personId, firstName, lastName, email, dateBirth, LocalDateTime.now());
-  }
-}
+) {}
