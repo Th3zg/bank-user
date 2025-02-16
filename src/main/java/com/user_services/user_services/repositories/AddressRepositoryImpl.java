@@ -33,8 +33,9 @@ public class AddressRepositoryImpl implements AddressRepository {
               address.getPostalCode(),
               address.getCountryCode()
       );
+      logger.info("Address created successfully");
     }).onFailure(ex -> {
-      logger.error("Error creating client", ex);
+      logger.error("Error creating address", ex);
       DatabaseErrorExceptionMapper.fromException((DataAccessException) ex);
     });
   }

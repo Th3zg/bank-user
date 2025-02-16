@@ -25,7 +25,7 @@ public class PhoneRepositoryImpl {
       );
       logger.info("Phone created successfully");
     }).onFailure(ex -> {
-      logger.error("Error creating client", ex);
+      logger.error("Error creating phone", ex);
       DatabaseErrorExceptionMapper.fromException((DataAccessException) ex);
     });
   }
