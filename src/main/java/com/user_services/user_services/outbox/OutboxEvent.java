@@ -4,8 +4,9 @@ import java.time.LocalDateTime;
 
 public record OutboxEvent(
         Long id,
-        String eventType,
+        String aggregate_type,
+        long aggregate_id,
         Object payload,
-        LocalDateTime createdAt,
-        Boolean processed
+        OutboxEvent status,
+        LocalDateTime createdAt
 ) {}
