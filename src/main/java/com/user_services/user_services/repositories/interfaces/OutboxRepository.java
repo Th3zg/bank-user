@@ -7,4 +7,6 @@ import java.util.List;
 public interface OutboxRepository {
   List<OutboxEvent> findByProcessedFalse();
   void markAsProcessed(Long id);
+  void insert(OutboxEvent event);
+  List<OutboxEvent> findPendingEvents();
 }
