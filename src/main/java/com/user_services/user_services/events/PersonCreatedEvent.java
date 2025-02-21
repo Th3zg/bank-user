@@ -13,5 +13,6 @@ public record PersonCreatedEvent(
         String profileImageUrl,
         String communicationPreference,
         Boolean termsAccepted,
+        String bio,
         LocalDateTime createdAt
 ) {}
