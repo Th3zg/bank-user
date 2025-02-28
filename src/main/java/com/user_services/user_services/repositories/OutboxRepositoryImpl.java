@@ -62,7 +62,7 @@ public class OutboxRepositoryImpl implements OutboxRepository {
   public Try<List<OutboxEvent>> findPendingEvents() {
     String sql = """
             SELECT * FROM outbox_events
-            WHERE status = ?
+            WHERE status = PENDING
             ORDER BY created_at ASC
             """;
 
