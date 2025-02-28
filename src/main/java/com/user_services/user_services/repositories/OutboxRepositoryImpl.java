@@ -43,7 +43,7 @@ public class OutboxRepositoryImpl implements OutboxRepository {
   public Try<Void> insert(OutboxEvent event) {
     String sql = """
             INSERT INTO outbox_events (aggregate_type, aggregate_id, type, payload, status, created_at)
-            VALUES (?, ?, ?, CAST(? AS JSONB), ?, ?)
+            VALUES (?, ?, ?, ?::jsonb), ?, ?)
         """;
 
     String payloadJson = Json.convertPayloadToJson(event.payload());
@@ -61,8 +61,8 @@ public class OutboxRepositoryImpl implements OutboxRepository {
   @Override
   public Try<List<OutboxEvent>> findPendingEvents() {
     String sql = """
-            SELECT * FRM outbox_events
-            WHERE status = PENDING
+            SELECT * FROM outbox_events
+            WHERE status = ?
             ORDER BY created_at ASC
             """;
 
