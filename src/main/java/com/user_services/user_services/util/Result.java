@@ -1,5 +1,6 @@
 package com.user_services.user_services.util;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -11,13 +12,17 @@ public record Result<T>(T value, boolean isSuccess, List<String> errors) {
   }
 
   private Result<Void> validateState(boolean isSuccess, List<String> errors) {
+    List<String> validateErrors = new ArrayList<>();
+
     if (isSuccess && !errors.isEmpty()) {
-      return Result.failure("Successful results cannot have errors");
+      validateErrors.add("Successful results cannot have errors");
     }
 
     if (!isSuccess && errors.isEmpty()) {
-      return Result.failure("Failed results require at least 1 error");
+      validateErrors.add("Failed results require at least 1 error");
     }
+
+    return validateErrors.isEmpty() ? Result.success() : Result.failure(validateErrors);
   }
 
   public static <T> Result<T> success(T value) {
