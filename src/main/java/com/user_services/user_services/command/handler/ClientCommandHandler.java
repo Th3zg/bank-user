@@ -11,8 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.Collections;
-
 @Component
 @RequiredArgsConstructor
 public class ClientCommandHandler {
@@ -28,7 +26,7 @@ public class ClientCommandHandler {
       Try<Void> resultClientCreation = clientRepository.create(client);
       if (resultClientCreation.isFailure()) {
         status.setRollbackOnly();
-        return Result.failure(Collections.singleton("Error: " + resultClientCreation.getCause().getMessage()));
+        return Result.failure("Error: " + resultClientCreation.getCause().getMessage());
       }
 
       return Result.success();
