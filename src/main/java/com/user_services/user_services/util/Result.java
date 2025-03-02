@@ -1,5 +1,7 @@
 package com.user_services.user_services.util;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -37,12 +39,12 @@ public record Result<T>(T value, boolean isSuccess, List<String> errors) {
     return new Result<>(null, false, errors);
   }
 
-  public static <T> Result<T> failure(String error) { return new Result<>(null, false, Collections.singletonList(error)); }
+  public static <T> Result<T> failure(String error) {
+    return new Result<>(null, false, Collections.singletonList(error));
+  }
 
   public List<String> getUniqueError() { return errors.stream().distinct().toList(); }
-
-  public boolean isFailure() {
-    return !isSuccess;
-  }
+  public boolean isFailure() { return !isSuccess; }
   public boolean isSuccess() { return isSuccess; }
+  public T getValue() { return value; }
 }
