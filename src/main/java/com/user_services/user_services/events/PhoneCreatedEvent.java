@@ -4,7 +4,7 @@ import com.user_services.user_services.enums.PhoneType;
 
 import java.time.LocalDateTime;
 
-public record PhoneAddedEvent(
+public record PhoneCreatedEvent(
         Long phoneId,
         Long personId,
         String phoneNumber,

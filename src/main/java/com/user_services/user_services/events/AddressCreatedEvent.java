@@ -2,7 +2,7 @@ package com.user_services.user_services.events;
 
 import java.time.LocalDateTime;
 
-public record AddressAddedEvent(
+public record AddressCreatedEvent(
         Long addressId,
         Long personId,
         String street,
