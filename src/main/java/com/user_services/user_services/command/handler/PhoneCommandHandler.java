@@ -18,7 +18,7 @@ public class PhoneCommandHandler {
   private final PhoneRepositoryImpl phoneRepository;
   private final TransactionTemplate transactionTemplate;
 
-  public Result<Void> handler(Long personId, CreatePhoneCommand command) {
+  public Result<Phone> handler(Long personId, CreatePhoneCommand command) {
     // create the phone
     Phone phone = createPhone(personId, command);
 
@@ -26,7 +26,7 @@ public class PhoneCommandHandler {
     if (resultPhoneCreation.isFailure()) {
       return Result.failure("Error: " + resultPhoneCreation.getCause().getMessage());
     }
-    return Result.success();
+    return Result.success(phone);
   }
   private Phone createPhone(long personsId, CreatePhoneCommand command) {
     return new Phone.Builder()

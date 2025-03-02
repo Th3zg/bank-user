@@ -16,7 +16,7 @@ public class ClientCommandHandler {
   private final Logger logger = LoggerFactory.getLogger(ClientCommandHandler.class);
   private final ClientRepositoryImpl clientRepository;
 
-  public Result<Void> handler(long personsId, CreateClientCommand command) {
+  public Result<Client> handler(long personsId, CreateClientCommand command) {
     // create the client
     Client client = createClient(personsId, command);
 
@@ -24,7 +24,8 @@ public class ClientCommandHandler {
     if (resultClientCreation.isFailure()) {
       return Result.failure("Error: " + resultClientCreation.getCause().getMessage());
     }
-    return Result.success();
+
+    return Result.success(client);
   }
 
   private Client createClient(long personsId, CreateClientCommand command) {

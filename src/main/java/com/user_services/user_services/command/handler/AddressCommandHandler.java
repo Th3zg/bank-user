@@ -16,7 +16,7 @@ public class AddressCommandHandler {
   private final Logger logger = LoggerFactory.getLogger(AddressCommandHandler.class);
   private final AddressRepositoryImpl addressRepository;
 
-  public Result<Void> handler(Long personId, CreateAddressCommand command) {
+  public Result<Address> handler(Long personId, CreateAddressCommand command) {
     // create the address
     Address address = createAddress(personId, command);
 
@@ -24,7 +24,7 @@ public class AddressCommandHandler {
     if (resultAddressCreation.isFailure()) {
       return Result.failure("Error: " + resultAddressCreation.getCause().getMessage());
     }
-    return Result.success();
+    return Result.success(address);
   }
 
   private Address createAddress(long personId, CreateAddressCommand command) {
