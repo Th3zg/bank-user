@@ -60,89 +60,62 @@ public class PersonCommandHandler {
         return Result.failure("failed to create client");
       }
 
+      // get created entities
       Client client = clientResult.getValue();
       Address address = addressResult.getValue();
       Phone phone = phoneResult.getValue();
 
-      outboxRepository.insert(new OutboxEvent(
-              null,
-              "Person",
-              person.getId(),
-              "PersonCreatedEvent",
-              new PersonCreatedEvent(
-                      person.getId(),
-                      person.getFirstName(),
-                      person.getLastName(),
-                      person.getEmail(),
-                      person.getDateBirth(),
-                      person.getGender().getValue(),
-                      person.getProfileImageUrl(),
-                      person.getCommunicationPreference().getValue(),
-                      person.isTermsAccepted(),
-                      person.getBio(),
-                      LocalDateTime.now()
-              ),
-              OutboxStatus.PENDING
+      createOutboxEvent("Person", personId, "PersonCreatedEvent", new PersonCreatedEvent(
+              personId,
+              person.getFirstName(),
+              person.getLastName(),
+              person.getEmail(),
+              person.getDateBirth(),
+              person.getGender().getValue(),
+              person.getProfileImageUrl(),
+              person.getCommunicationPreference().getValue(),
+              person.isTermsAccepted(),
+              person.getBio(),
+              LocalDateTime.now()
       ));
 
-      outboxRepository.insert(new OutboxEvent(
-              null,
-              "Client",
+      createOutboxEvent("Client", client.getId(), "ClientCreatedEvent", new ClientCreatedEvent(
               client.getId(),
-              "ClientCreatedEvent",
-              new ClientCreatedEvent(
-                      client.getId(),
-                      client.getPersonId(),
-                      client.getAccountNumber(),
-                      client.getAccountBalance(),
-                      client.getOverdraftLimit(),
-                      client.getRiskLevel(),
-                      client.getCreditScore(),
-                      client.getTotalLoans(),
-                      client.getTotalInvestments(),
-                      client.getTotalInsurance(),
-                      client.getMonthlyIncome(),
-                      client.getOccupation(),
-                      client.getMaritalStatus(),
-                      LocalDateTime.MIN
-              ),
-              OutboxStatus.PENDING
+              client.getPersonId(),
+              client.getAccountNumber(),
+              client.getAccountBalance(),
+              client.getOverdraftLimit(),
+              client.getRiskLevel(),
+              client.getCreditScore(),
+              client.getTotalLoans(),
+              client.getTotalInvestments(),
+              client.getTotalInsurance(),
+              client.getMonthlyIncome(),
+              client.getOccupation(),
+              client.getMaritalStatus(),
+              LocalDateTime.now()
       ));
 
-      outboxRepository.insert(new OutboxEvent(
-              null,
-              "Address",
+      createOutboxEvent("Address", address.getAddressId(), "AddressCreatedEvent", new AddressCreatedEvent(
               address.getAddressId(),
-              "AddressCreatedEvent",
-              new AddressCreatedEvent(
-                      address.getAddressId(),
-                      address.getPersonId(),
-                      address.getStreet(),
-                      address.getStreetNumber(),
-                      address.getApartmentNumber(),
-                      address.getNeighborhood(),
-                      address.getCity(),
-                      address.getState(),
-                      address.getPostalCode(),
-                      address.getCountryCode(),
-                      LocalDateTime.now()
-              ),
-              OutboxStatus.PENDING
+              address.getPersonId(),
+              address.getStreet(),
+              address.getStreetNumber(),
+              address.getApartmentNumber(),
+              address.getNeighborhood(),
+              address.getCity(),
+              address.getState(),
+              address.getPostalCode(),
+              address.getCountryCode(),
+              LocalDateTime.now()
       ));
 
-      outboxRepository.insert(new OutboxEvent(
-              null,
-              "Phone",
+      createOutboxEvent("Phone", phone.getPhoneId(), "PhoneCreatedEvent", new PhoneCreatedEvent(
               phone.getPhoneId(),
-              "PhoneCreatedEvent",
-              new PhoneCreatedEvent(
-                      phone.getPhoneId(),
-                      phone.getPersonId(),
-                      phone.getPhoneNumber(),
-                      phone.getPhoneType(),
-                      LocalDateTime.now()
-              ),
-              OutboxStatus.PENDING
+              phone.getPersonId(),
+              phone.getPhoneNumber(),
+              phone.getPhoneType(),
+              LocalDateTime.now()
       ));
 
       return Result.success();
@@ -162,19 +135,15 @@ public class PersonCommandHandler {
             .build();
   }
 
-  private void createOutboxEvent(String aggregate_type,
-                                 long aggregate_id,
-                                 String type,
-                                 Object payload,
-                                 OutboxStatus status,
-                                 Object event) {
+  private void createOutboxEvent(String aggregateType, Long aggregateId, String eventType, Object payload) {
     outboxRepository.insert(new OutboxEvent(
             null,
-            aggregate_type,
-            aggregate_id,
-            type,
+            aggregateType,
+            aggregateId,
+            eventType,
             payload,
-            status
+            OutboxStatus.PENDING
     ));
   }
+
 }
