@@ -8,30 +8,23 @@ import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-
+@Component
 @RequiredArgsConstructor
 public class AddressCommandHandler {
   private final Logger logger = LoggerFactory.getLogger(AddressCommandHandler.class);
-  private final TransactionTemplate transactionTemplate;
   private final AddressRepositoryImpl addressRepository;
 
   public Result<Void> handler(Long personId, CreateAddressCommand command) {
-    return transactionTemplate.execute(status -> {
-      // create the address
-      Address address = createAddress(personId, command);
+    // create the address
+    Address address = createAddress(personId, command);
 
-      Try<Void> resultAddressCreation = addressRepository.create(address);
-      if (resultAddressCreation.isFailure()) {
-        status.setRollbackOnly();
-        return Result.failure(Collections.singleton("Error: " + resultAddressCreation.getCause().getMessage()));
-      }
-
-      return Result.success();
-    });
-
+    Try<Void> resultAddressCreation = addressRepository.create(address);
+    if (resultAddressCreation.isFailure()) {
+      return Result.failure("Error: " + resultAddressCreation.getCause().getMessage());
+    }
+    return Result.success();
   }
 
   private Address createAddress(long personId, CreateAddressCommand command) {

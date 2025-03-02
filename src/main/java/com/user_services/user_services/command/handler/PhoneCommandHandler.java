@@ -11,8 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.Collections;
-
 @Component
 @RequiredArgsConstructor
 public class PhoneCommandHandler {
@@ -21,18 +19,14 @@ public class PhoneCommandHandler {
   private final TransactionTemplate transactionTemplate;
 
   public Result<Void> handler(Long personId, CreatePhoneCommand command) {
-    return transactionTemplate.execute(status -> {
-      // create the phone
-      Phone phone = createPhone(personId, command);
+    // create the phone
+    Phone phone = createPhone(personId, command);
 
-      Try<Void> resultPhoneCreation = phoneRepository.create(phone);
-      if (resultPhoneCreation.isFailure()) {
-        status.setRollbackOnly();
-        return Result.failure(Collections.singleton("Error: " + resultPhoneCreation.getCause().getMessage()));
-      }
-
-      return Result.success();
-    });
+    Try<Void> resultPhoneCreation = phoneRepository.create(phone);
+    if (resultPhoneCreation.isFailure()) {
+      return Result.failure("Error: " + resultPhoneCreation.getCause().getMessage());
+    }
+    return Result.success();
   }
   private Phone createPhone(long personsId, CreatePhoneCommand command) {
     return new Phone.Builder()

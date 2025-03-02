@@ -9,28 +9,22 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionTemplate;
 
 @Component
 @RequiredArgsConstructor
 public class ClientCommandHandler {
   private final Logger logger = LoggerFactory.getLogger(ClientCommandHandler.class);
   private final ClientRepositoryImpl clientRepository;
-  private final TransactionTemplate transactionTemplate;
 
   public Result<Void> handler(long personsId, CreateClientCommand command) {
-    return transactionTemplate.execute(status -> {
-      // create the client
-      Client client = createClient(personsId, command);
+    // create the client
+    Client client = createClient(personsId, command);
 
-      Try<Void> resultClientCreation = clientRepository.create(client);
-      if (resultClientCreation.isFailure()) {
-        status.setRollbackOnly();
-        return Result.failure("Error: " + resultClientCreation.getCause().getMessage());
-      }
-
-      return Result.success();
-    });
+    Try<Void> resultClientCreation = clientRepository.create(client);
+    if (resultClientCreation.isFailure()) {
+      return Result.failure("Error: " + resultClientCreation.getCause().getMessage());
+    }
+    return Result.success();
   }
 
   private Client createClient(long personsId, CreateClientCommand command) {
