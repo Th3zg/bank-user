@@ -75,6 +75,7 @@ public class OutboxRepositoryImpl implements OutboxRepository {
                     rs.getObject("payload"),
                     OutboxStatus.valueOf(rs.getString("status"))
             ))
-    );
+    )
+    .onFailure(err -> logger.error("Technical error in OutboxRepository {}", err.getMessage()));
   }
 }
