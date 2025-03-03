@@ -23,9 +23,9 @@ public class AddressCommandHandler {
       return Try.of(() -> createAddress(personId, command))
               .flatMap(address -> persistAddress(address, status))
               .map(address -> {
-                        logger.info("Client created successfully: {}", address.getId());
-                        return address;
-                      });
+                logger.info("Client created successfully: {}", address.getAddressId());
+                return address;
+              });
     });
   }
 
@@ -44,7 +44,7 @@ public class AddressCommandHandler {
             .value();
   }
 
-  private Try<Void> persistAddress(Address address, TransactionStatus status) {
+  private Try<Address> persistAddress(Address address, TransactionStatus status) {
     return addressRepository.create(address)
             .onFailure(err -> {
               logger.error("Error creating address: {}", err.getMessage());

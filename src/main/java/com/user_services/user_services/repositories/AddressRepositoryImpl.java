@@ -18,10 +18,17 @@ public class AddressRepositoryImpl implements AddressRepository {
   private final Logger logger = LoggerFactory.getLogger(AddressRepositoryImpl.class);
   private final JdbcTemplate jdbcTemplate;
 
-  public Try<Void> create(Address address) {
-    String sql = "INSERT INTO address (person_id, street, street_number, apartment_number, neighborhood, city, state, postal_code, country_code) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+  public Try<Address> create(Address address) {
+    String sql = """
+            INSERT INTO address (
+            person_id, street, street_number, apartment_number,
+            neighborhood, city, state, postal_code, country_code
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            RETURNING person_id, street, street_number, apartment_number,
+            neighborhood, city, state, postal_code, country_code
+            """;
 
-    return Try.run(() -> {
+    return Try.of(() -> {
       jdbcTemplate.update(sql,
               address.getPersonId(),
               address.getStreet(),
@@ -34,6 +41,7 @@ public class AddressRepositoryImpl implements AddressRepository {
               address.getCountryCode()
       );
       logger.info("Address created successfully");
+      return address;
     }).onFailure(ex -> {
       logger.error("Error creating address", ex);
       DatabaseErrorExceptionMapper.fromException((DataAccessException) ex);

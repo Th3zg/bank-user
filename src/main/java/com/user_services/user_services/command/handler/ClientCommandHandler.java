@@ -48,7 +48,7 @@ public class ClientCommandHandler {
             .build();
   }
 
-  private Try<Void> persistClient(Client client, TransactionStatus status) {
+  private Try<Client> persistClient(Client client, TransactionStatus status) {
     return clientRepository.create(client)
             .onFailure(err -> {
               logger.error("Error creating client: {}", err.getMessage());
