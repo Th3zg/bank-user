@@ -1,6 +1,8 @@
 package com.user_services.user_services.command.handler;
 
 import com.user_services.user_services.command.CreatePersonCommand;
+import com.user_services.user_services.enums.AggregateType;
+import com.user_services.user_services.enums.EventType;
 import com.user_services.user_services.enums.OutboxStatus;
 import com.user_services.user_services.events.AddressCreatedEvent;
 import com.user_services.user_services.events.ClientCreatedEvent;
@@ -20,9 +22,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -38,91 +42,16 @@ public class PersonCommandHandler {
 
   public Result<Void> handler(CreatePersonCommand command) {
     return transactionTemplate.execute(status -> {
-      // create the person
-      Person person = createPerson(command);
-
-      Try<Long> resultPersonCreation = personRepository.create(person);
-      if (resultPersonCreation.isFailure()) {
-        status.setRollbackOnly();
-        return Result.failure("Error: " + resultPersonCreation.getCause().getMessage());
-      }
-
-      // get id of the peron
-      Long personId = resultPersonCreation.get();
-
-      // Pass the id to the client, the address and the phone to create them
-      Result<Client> clientResult = clientCommandHandler.handler(personId, command.client());
-      Result<Address> addressResult = addressCommandHandler.handler(personId, command.address());
-      Result<Phone> phoneResult = phoneCommandHandler.handler(personId, command.phone());
-
-      if (clientResult.isFailure() || addressResult.isFailure() || phoneResult.isFailure()) {
-        logger.error("Error: {} {} {}", clientResult.errors(), addressResult.errors(), phoneResult.errors());
-        return Result.failure("failed to create client");
-      }
-
-      // get created entities
-      Client client = clientResult.getValue();
-      Address address = addressResult.getValue();
-      Phone phone = phoneResult.getValue();
-
-      createOutboxEvent("Person", personId, "PersonCreatedEvent", new PersonCreatedEvent(
-              personId,
-              person.getFirstName(),
-              person.getLastName(),
-              person.getEmail(),
-              person.getDateBirth(),
-              person.getGender().getValue(),
-              person.getProfileImageUrl(),
-              person.getCommunicationPreference().getValue(),
-              person.isTermsAccepted(),
-              person.getBio(),
-              LocalDateTime.now()
-      ));
-
-      createOutboxEvent("Client", client.getId(), "ClientCreatedEvent", new ClientCreatedEvent(
-              client.getId(),
-              client.getPersonId(),
-              client.getAccountNumber(),
-              client.getAccountBalance(),
-              client.getOverdraftLimit(),
-              client.getRiskLevel(),
-              client.getCreditScore(),
-              client.getTotalLoans(),
-              client.getTotalInvestments(),
-              client.getTotalInsurance(),
-              client.getMonthlyIncome(),
-              client.getOccupation(),
-              client.getMaritalStatus(),
-              LocalDateTime.now()
-      ));
-
-      createOutboxEvent("Address", address.getAddressId(), "AddressCreatedEvent", new AddressCreatedEvent(
-              address.getAddressId(),
-              address.getPersonId(),
-              address.getStreet(),
-              address.getStreetNumber(),
-              address.getApartmentNumber(),
-              address.getNeighborhood(),
-              address.getCity(),
-              address.getState(),
-              address.getPostalCode(),
-              address.getCountryCode(),
-              LocalDateTime.now()
-      ));
-
-      createOutboxEvent("Phone", phone.getPhoneId(), "PhoneCreatedEvent", new PhoneCreatedEvent(
-              phone.getPhoneId(),
-              phone.getPersonId(),
-              phone.getPhoneNumber(),
-              phone.getPhoneType(),
-              LocalDateTime.now()
-      ));
-
-      return Result.success();
+       create the person
+      return Try.of(() -> createPersonEntity(command))
+              .flatMap(person -> persistPerson(person, status))
+              .flatMap(personId -> createRelatedEntities(personId, command, status))
+              .fold(err -> Result.failure("Error: " + err),
+                      success -> Result.success());
     });
   }
 
-  private Person createPerson(CreatePersonCommand command) {
+  private Person createPersonEntity(CreatePersonCommand command) {
     return new Person.Builder()
             .setFirstName(command.firstName())
             .setLastName((command.lastName()))
@@ -135,8 +64,44 @@ public class PersonCommandHandler {
             .build();
   }
 
-  private void createOutboxEvent(String aggregateType, Long aggregateId, String eventType, Object payload) {
-    outboxRepository.insert(new OutboxEvent(
+  private Try<Long> persistPerson(Person person, TransactionStatus status) {
+    return personRepository.create(person)
+            .onFailure(err -> {
+              logger.error("Error creating person: {}", err.getMessage());
+              status.setRollbackOnly();
+            });
+  }
+
+  private Try<Void> createRelatedEntities(long personId, CreatePersonCommand command, TransactionStatus status) {
+    return Try.of(() -> {
+      Try<Client> clientResult = clientCommandHandler.handler(personId, command.client());
+      Try<Address> addressResult = addressCommandHandler.handler(personId, command.address());
+      Try<Phone> phoneResult = phoneCommandHandler.handler(personId, command.phone());
+
+      return Try.sequence(List.of(clientResult, addressResult, phoneResult))
+              .flatMap(results -> {
+                Client client = results.get();
+                Address address = results.get(1);
+                Phone phone = results.get(2);
+                return Try.success(null);
+              })
+
+       get created entities
+      Client client = clientResult.getValue();
+      Address address = addressResult.getValue();
+      Phone phone = phoneResult.getValue();
+
+    });
+  }
+
+  private void generateOutboxEvents()
+
+  private void createOutboxEvent(AggregateType aggregateType, long id, EventType eventType, Object payload) {
+    Try.of(() -> outboxRepository.insert(buildOutboxEvent( )));
+  }
+
+  private OutboxEvent buildOutboxEvent(String aggregateType, Long aggregateId, String eventType, Object payload) {
+    return new OutboxEvent(
             null,
             aggregateType,
             aggregateId,
@@ -146,4 +111,84 @@ public class PersonCommandHandler {
     ));
   }
 
+  private void createPersonOutboxEvent(long personId, Person person) {
+    createOutboxEvent(
+            AggregateType.PERSON,
+            personId,
+            EventType.PERSON_CREATED_EVENT,
+            new PersonCreatedEvent(
+                    personId,
+                    person.getFirstName(),
+                    person.getLastName(),
+                    person.getEmail(),
+                    person.getDateBirth(),
+                    person.getGender().getValue(),
+                    person.getProfileImageUrl(),
+                    person.getCommunicationPreference().getValue(),
+                    person.isTermsAccepted(),
+                    person.getBio(),
+                    LocalDateTime.now()
+            )
+    );
+  }
+
+  private void createClientOutboxEvent(long clientId, Client client) {
+    createOutboxEvent(
+            AggregateType.CLIENT,
+            clientId,
+            EventType.CLIENT_CREATED_EVENT,
+            new ClientCreatedEvent(
+                    client.getId(),
+                    client.getPersonId(),
+                    client.getAccountNumber(),
+                    client.getAccountBalance(),
+                    client.getOverdraftLimit(),
+                    client.getRiskLevel(),
+                    client.getCreditScore(),
+                    client.getTotalLoans(),
+                    client.getTotalInvestments(),
+                    client.getTotalInsurance(),
+                    client.getMonthlyIncome(),
+                    client.getOccupation(),
+                    client.getMaritalStatus(),
+                    LocalDateTime.now()
+            )
+    );
+  }
+
+  private void createAddressOutboxEvent(long addressId, Address address) {
+    createOutboxEvent(
+            AggregateType.ADDRESS,
+            addressId,
+            EventType.ADDRESS_CREATED_EVENT,
+            new AddressCreatedEvent(
+                    address.getAddressId(),
+                    address.getPersonId(),
+                    address.getStreet(),
+                    address.getStreetNumber(),
+                    address.getApartmentNumber(),
+                    address.getNeighborhood(),
+                    address.getCity(),
+                    address.getState(),
+                    address.getPostalCode(),
+                    address.getCountryCode(),
+                    LocalDateTime.now()
+            )
+    );
+  }
+
+  private void createPhoneOutboxEvent(long phoneId, Phone phone) {
+    createOutboxEvent(
+            AggregateType.PHONE,
+            phoneId,
+            EventType.PHONE_CREATED_EVENT,
+            new PhoneCreatedEvent(
+                    phone.getPhoneId(),
+                    phone.getPersonId(),
+                    phone.getPhoneNumber(),
+                    phone.getPhoneType(),
+                    LocalDateTime.now()
+            )
+    );
+  }
 }
