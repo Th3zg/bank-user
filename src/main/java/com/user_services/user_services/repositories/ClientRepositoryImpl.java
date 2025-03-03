@@ -18,13 +18,22 @@ public class ClientRepositoryImpl implements UserRepository {
   private final JdbcTemplate jdbcTemplate;
 
   @Override
-  public Try<Void> create(Client client) {
-    String sql = "INSERT INTO clients (person_id, account_number, account_balance, " +
-            "overdraft_limit, risk_level, credit_score, total_loans, total_investments, " +
-            "total_insurance, monthly_income, occupation, marital_status) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+  public Try<Client> create(Client client) {
+    String sql = """
+    INSERT INTO clients (
+        person_id, account_number, account_balance,
+        overdraft_limit, risk_level, credit_score,
+        total_loans, total_investments, total_insurance,
+        monthly_income, occupation, marital_status
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    RETURNING
+        person_id, account_number, account_balance,
+        overdraft_limit, risk_level, credit_score,
+        total_loans, total_investments, total_insurance,
+        monthly_income, occupation, marital_status
+    """;
 
-    return Try.run(() -> {
+    return Try.of(() -> {
       jdbcTemplate.update(sql,
               client.getPersonId(),
               client.getAccountNumber(),
@@ -40,6 +49,7 @@ public class ClientRepositoryImpl implements UserRepository {
               client.getMaritalStatus()
       );
       logger.info("Client created successfully");
+      return client;
     }).onFailure(ex -> {
       logger.error("Error creating client", ex);
       DatabaseErrorExceptionMapper.fromException((DataAccessException) ex);
