@@ -23,7 +23,7 @@ public class PhoneCommandHandler {
       return Try.of(() -> createPhone(personId, command))
               .flatMap(phone -> persistPhone(phone, status))
               .map(phone -> {
-                logger.info("Client created successfully: {}", phone.getId());
+                logger.info("Client created successfully: {}", phone.getPhoneId());
                 return phone;
               });
     });
@@ -37,7 +37,7 @@ public class PhoneCommandHandler {
             .build();
   }
 
-  private Try<Void> persistPhone(Phone phone, TransactionStatus status) {
+  private Try<Phone> persistPhone(Phone phone, TransactionStatus status) {
     return phoneRepository.create(phone)
             .onFailure(err -> {
               logger.error("Error creating phone: {}", err.getMessage());
