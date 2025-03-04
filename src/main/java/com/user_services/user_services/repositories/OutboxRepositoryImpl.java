@@ -1,5 +1,7 @@
 package com.user_services.user_services.repositories;
 
+import com.user_services.user_services.enums.AggregateType;
+import com.user_services.user_services.enums.EventType;
 import com.user_services.user_services.enums.OutboxStatus;
 import com.user_services.user_services.outbox.OutboxEvent;
 import com.user_services.user_services.repositories.interfaces.OutboxRepository;
@@ -69,9 +71,9 @@ public class OutboxRepositoryImpl implements OutboxRepository {
     return Try.of(() ->
             jdbcTemplate.query(sql, (rs, rowNum) -> new OutboxEvent(
                     rs.getLong("id"),
-                    rs.getString("aggregate_type"),
+                    AggregateType.valueOf(rs.getString("aggregate_type")),
                     rs.getLong("aggregate_id"),
-                    rs.getString("type"),
+                    EventType.valueOf(rs.getString("type")),
                     rs.getObject("payload"),
                     OutboxStatus.valueOf(rs.getString("status"))
             ))
