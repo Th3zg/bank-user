@@ -26,7 +26,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -42,11 +41,10 @@ public class PersonCommandHandler {
 
   public Result<Void> handler(CreatePersonCommand command) {
     return transactionTemplate.execute(status -> {
-       create the person
       return Try.of(() -> createPersonEntity(command))
               .flatMap(person -> persistPerson(person, status))
-              .flatMap(personId -> createRelatedEntities(personId, command, status))
-              .fold(err -> Result.failure("Error: " + err),
+              .flatMap(person -> createRelatedEntities(person, command, status))
+              .fold(err -> Result.failure("Error: " + err.getMessage()),
                       success -> Result.success());
     });
   }
@@ -64,7 +62,7 @@ public class PersonCommandHandler {
             .build();
   }
 
-  private Try<Long> persistPerson(Person person, TransactionStatus status) {
+  private Try<Person> persistPerson(Person person, TransactionStatus status) {
     return personRepository.create(person)
             .onFailure(err -> {
               logger.error("Error creating person: {}", err.getMessage());
@@ -72,35 +70,46 @@ public class PersonCommandHandler {
             });
   }
 
-  private Try<Void> createRelatedEntities(long personId, CreatePersonCommand command, TransactionStatus status) {
+  private Try<Try<Void>> createRelatedEntities(Person person, CreatePersonCommand command, TransactionStatus status) {
     return Try.of(() -> {
-      Try<Client> clientResult = clientCommandHandler.handler(personId, command.client());
-      Try<Address> addressResult = addressCommandHandler.handler(personId, command.address());
-      Try<Phone> phoneResult = phoneCommandHandler.handler(personId, command.phone());
+      Try<Client> clientTry = clientCommandHandler.handler(person.getId(), command.client());
+      Try<Address> addressTry = addressCommandHandler.handler(person.getId(), command.address());
+      Try<Phone> phoneTry = phoneCommandHandler.handler(person.getId(), command.phone());
 
-      return Try.sequence(List.of(clientResult, addressResult, phoneResult))
-              .flatMap(results -> {
-                Client client = results.get();
-                Address address = results.get(1);
-                Phone phone = results.get(2);
-                return Try.success(null);
+      return Try.run(() -> {
+                Client client = clientTry.getOrElse(() -> {
+                  logger.error("Error creating client");
+                  return null;
+                });
+                Address address = addressTry.getOrElse(() -> {
+                  logger.error("Error creating address");
+                  return null;
+                });
+                Phone phone = phoneTry.getOrElse(() -> {
+                  logger.error("Error creating client");
+                  return null;
+                });
+                generateOutboxEvents(person, client, address, phone);
               })
-
-       get created entities
-      Client client = clientResult.getValue();
-      Address address = addressResult.getValue();
-      Phone phone = phoneResult.getValue();
-
+              .onFailure(ex -> logger.error("Error creating related entities", ex));
     });
   }
 
-  private void generateOutboxEvents()
-
-  private void createOutboxEvent(AggregateType aggregateType, long id, EventType eventType, Object payload) {
-    Try.of(() -> outboxRepository.insert(buildOutboxEvent( )));
+  private void generateOutboxEvents(Person person, Client client, Address address, Phone phone) {
+    createPersonOutboxEvent(person.getId(), person);
+    createClientOutboxEvent(client.getId(), client);
+    createAddressOutboxEvent(address.getAddressId(), address);
+    createPhoneOutboxEvent(phone.getPhoneId(), phone);
   }
 
-  private OutboxEvent buildOutboxEvent(String aggregateType, Long aggregateId, String eventType, Object payload) {
+  private void createOutboxEvent(AggregateType aggregateType, long aggregateId, EventType eventType, Object payload) {
+    Try.of(() -> outboxRepository.insert(buildOutboxEvent(aggregateType, aggregateId, eventType, payload)))
+            .onFailure(err -> {
+              logger.error("Error inserting {} event for ID {}: {}", eventType, aggregateId, err.getMessage());
+            });
+  }
+
+  private OutboxEvent buildOutboxEvent(AggregateType aggregateType, Long aggregateId, EventType eventType, Object payload) {
     return new OutboxEvent(
             null,
             aggregateType,
@@ -108,7 +117,7 @@ public class PersonCommandHandler {
             eventType,
             payload,
             OutboxStatus.PENDING
-    ));
+    );
   }
 
   private void createPersonOutboxEvent(long personId, Person person) {
