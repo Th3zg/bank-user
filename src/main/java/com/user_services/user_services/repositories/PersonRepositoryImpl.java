@@ -18,10 +18,16 @@ public class PersonRepositoryImpl implements PersonRepository {
   private final JdbcTemplate jdbcTemplate;
 
   @Override
-  public Try<Long> create(Person person) {
-    String sql = "INSERT INTO persons (first_name, last_name, date_birth, email, password, " +
-            "gender, profile_image_url, communication_preference, terms_accepted, bio) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING person_id";
+  public Try<Person> create(Person person) {
+    String sql = """
+            INSERT INTO persons (
+            first_name, last_name, date_birth, email, password,
+            gender, profile_image_url, communication_preference, terms_accepted, bio
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING person_id, first_name,
+            last_name, date_birth, email, password,
+            gender, profile_image_url, communication_preference,
+            terms_accepted, bio
+            """;
 
     return Try.of(() -> {
       Long personId = jdbcTemplate.queryForObject(
@@ -39,7 +45,7 @@ public class PersonRepositoryImpl implements PersonRepository {
               person.getBio()
       );
       logger.info("Person created with ID: {}", personId);
-      return personId;
+      return person;
     }).onFailure(ex -> {
       logger.error("Error creating person", ex);
       DatabaseErrorExceptionMapper.fromException((DataAccessException) ex);

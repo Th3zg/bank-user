@@ -1,8 +1,8 @@
 package com.user_services.user_services.repositories.interfaces;
 
-import com.user_services.user_services.model.Person;
+import com.user_services.user_services.model.entity.Person;
 import io.vavr.control.Try;
 
 public interface PersonRepository {
-  Try<Long> create(Person person);
+  Try<Person> create(Person person);
 }
