@@ -1,8 +1,11 @@
 package com.user_services.user_services.dto.error;
 
+import lombok.Getter;
+
 import java.time.LocalDateTime;
 import java.util.Set;
 
+@Getter
 public class ErrorResponse {
   private final String errorCode;
   private final Set<String> messages;
@@ -16,26 +19,6 @@ public class ErrorResponse {
     this.message = message;
     this.details = details;
     this.timestamp = LocalDateTime.now();
-  }
-
-  public String getErrorCode() {
-    return errorCode;
-  }
-
-  public Set<String> getMessages() {
-    return messages;
-  }
-
-  public String getMessage() {
-    return message;
-  }
-
-  public ErrorDetails getDetails() {
-    return details;
-  }
-
-  public LocalDateTime getTimestamp() {
-    return timestamp;
   }
 
   @Override
@@ -56,14 +39,6 @@ public class ErrorResponse {
     public ErrorDetails(String providedValue, Set<String> acceptedValues) {
       this.providedValue = providedValue;
       this.acceptedValues = acceptedValues;
-    }
-
-    public String getProvidedValue() {
-      return providedValue;
-    }
-
-    public Set<String> getAcceptedValues() {
-      return acceptedValues;
     }
 
     @Override
