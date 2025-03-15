@@ -5,7 +5,5 @@ public enum Role {
   USER("user"),
   GUEST("guest");
 
-  private final String value;
-
-  Role(String value) { this.value = value; }
+  Role(String value) {}
 }
