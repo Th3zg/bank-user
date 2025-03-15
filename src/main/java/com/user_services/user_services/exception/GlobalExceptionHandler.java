@@ -8,33 +8,46 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.jdbc.UncategorizedSQLException;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-
-import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
   private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
   @ExceptionHandler(Exception.class)
-  public void handleGenericHandle() {
+  public ResponseEntity<ErrorResponse> handleGenericHandle(Exception ex) {
+    logger.error("Unexpected error: ", ex);
+    return createErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR, Set.of(ErrorCode.INTERNAL_SERVER_ERROR.getMessage()), null, null);
   }
 
   // 2. deserialization Errors (400 Bad Request)
   @ExceptionHandler(HttpMessageNotReadableException.class)
-  public void handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+  public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+    logger.warn("Invalid request format: {}", ex.getMessage());
+    return createErrorResponse(
+            ErrorCode.INVALID_REQUEST,
+            Set.of(ErrorCode.INVALID_REQUEST.getMessage()),
+            extractInvalidValue(ex.getMessage()),
+            getAcceptedValues(ex.getMessage()));
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public void handleValidationExceptions(MethodArgumentNotValidException ex) {
+  public ResponseEntity<ErrorResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    Set<String> errorMessages = ex.getBindingResult().getAllErrors().stream()
+            .map(ObjectError::getDefaultMessage).collect(Collectors.toSet());
+
+    return createErrorResponse(ErrorCode.FIELD_VALIDATION_FAILED, errorMessages, null, null);
   }
 
   @ExceptionHandler(DataAccessException.class)
@@ -57,15 +70,33 @@ public class GlobalExceptionHandler {
   public void handleUncategorizedSQLException(UncategorizedSQLException ex) {
   }
 
-  private ResponseEntity<ErrorResponse> createErrorResponse(ErrorCode errorCode, String message, String providedValue, Set<String> acceptedValues) {
+  private ResponseEntity<ErrorResponse> createErrorResponse(ErrorCode errorCode, Set<String> messages, String providedValue, Set<String> acceptedValues) {
     ErrorResponse errorResponse = new ErrorResponse(
             errorCode,
-            null,
-            message,
-            new ErrorResponse.ErrorDetails(providedValue, acceptedValues),
-            HttpStatus.BAD_REQUEST.value()
+            messages,
+            new ErrorResponse.ErrorDetails(providedValue, acceptedValues)
     );
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
 
+    return ResponseEntity.status(errorCode.getStatus()).body(errorResponse);
+  }
+
+  private String extractInvalidValue(String errorMessage) {
+    if (errorMessage == null) return "unknown";
+
+    Pattern pattern = Pattern.compile("'(.*?)'|\"(.*?)\"");
+    Matcher matcher = pattern.matcher(errorMessage);
+
+    return matcher.find() ? (matcher.group(1) != null ? matcher.group(1) : matcher.group(2)) : "unknown";
+  }
+
+  private Set<String> getAcceptedValues(String errorMessage) {
+    String field = extractInvalidValue(errorMessage);
+
+    if (errorMessage.contains("Role")) {
+      return Set.of("ADMIN", "USER", "GUEST");
+    } else if (errorMessage.contains("Gender")) {
+      return Set.of("MALE", "FEMALE", "OTHER");
+    }
+    return Set.of();
   }
 }
