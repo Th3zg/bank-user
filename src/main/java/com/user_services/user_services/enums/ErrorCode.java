@@ -36,6 +36,8 @@ public enum ErrorCode {
   DATABASE_ERROR(500, "Internal database error"),
   DATABASE_CONNECTION_FAILED(503, "Database connection failed"),
   CONSTRAINT_VIOLATION(500, "Data integrity constraint violated"),
+  SQL_ERROR(500, "Unexpected SQL error occurred"),
+  SQL_SYNTAX_ERROR(500, "SQL syntax error detected"),
 
   // System
   INTERNAL_SERVER_ERROR(500, "Unexpected server error"),
