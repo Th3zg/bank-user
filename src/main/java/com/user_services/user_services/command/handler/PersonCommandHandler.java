@@ -86,7 +86,7 @@ public class PersonCommandHandler {
                   return null;
                 });
                 Phone phone = phoneTry.getOrElse(() -> {
-                  logger.error("Error creating client");
+                  logger.error("Error creating phone");
                   return null;
                 });
                 generateOutboxEvents(person, client, address, phone);
@@ -120,6 +120,7 @@ public class PersonCommandHandler {
     );
   }
 
+  // OutboxEvents
   private void createPersonOutboxEvent(long personId, Person person) {
     createOutboxEvent(
             AggregateType.PERSON,

@@ -1,7 +1,10 @@
 package com.user_services.user_services.enums;
 
+import lombok.Getter;
+
 import java.util.Set;
 
+@Getter
 public enum Field {
   ROLE(Set.of("ADMIN", "USER", "GUEST")),
   GENDER(Set.of("MALE", "FEMALE", "OTHER")),
@@ -10,8 +13,4 @@ public enum Field {
   private Set<String> values;
 
   Field(Set<String> value) {}
-
-  public Set<String> getValues() {
-    return values;
-    }
 }
