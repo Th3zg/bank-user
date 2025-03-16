@@ -2,6 +2,7 @@ package com.user_services.user_services.exception;
 
 import com.user_services.user_services.dto.error.ErrorResponse;
 import com.user_services.user_services.enums.ErrorCode;
+import com.user_services.user_services.enums.Field;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.sql.SQLException;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,23 +53,38 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(DataAccessException.class)
-  public void handleDataAccessException(DataAccessException ex) {
+  public ResponseEntity<ErrorResponse> handleDataAccessException(DataAccessException ex) {
+    logger.error("Database error: ", ex);
+    return createErrorResponse(ErrorCode.DATABASE_ERROR, Set.of(ErrorCode.DATABASE_ERROR.getMessage()), null, null);
   }
 
   @ExceptionHandler(DataIntegrityViolationException.class)
-  public void handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+  public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+    logger.error("integrity violation: ", ex);
+    return createErrorResponse(ErrorCode.DUPLICATE_ENTRY, Set.of(ErrorCode.DUPLICATE_ENTRY.getMessage()), extractConstraintValue(ex), null);
   }
 
   @ExceptionHandler(DataAccessResourceFailureException.class)
-  public void handleDataAccessResourceFailureException(DataAccessResourceFailureException ex) {
+  public ResponseEntity<ErrorResponse> handleDataAccessResourceFailureException(DataAccessResourceFailureException ex) {
+    logger.error("Database connection failed: ", ex);
+    return createErrorResponse(ErrorCode.DATABASE_CONNECTION_FAILED, Set.of(ErrorCode.DATABASE_CONNECTION_FAILED.getMessage()), null, null);
   }
 
   @ExceptionHandler(IncorrectResultSizeDataAccessException.class)
-  public void handleIncorrectResultSizeDataAccessException(IncorrectResultSizeDataAccessException ex) {
+  public ResponseEntity<ErrorResponse> handleIncorrectResultSizeDataAccessException(IncorrectResultSizeDataAccessException ex) {
+    logger.error("Query result size error: ", ex);
+    return createErrorResponse(ErrorCode.RESOURCE_NOT_FOUND, Set.of(ErrorCode.RESOURCE_NOT_FOUND.getMessage()), null, null);
   }
 
   @ExceptionHandler(UncategorizedSQLException.class)
-  public void handleUncategorizedSQLException(UncategorizedSQLException ex) {
+  public ResponseEntity<ErrorResponse> handleUncategorizedSQLException(UncategorizedSQLException ex) {
+    logger.error("Uncategorized SQL error: ", ex);
+    return createErrorResponse(
+            ErrorCode.SQL_ERROR,
+            Set.of(ErrorCode.SQL_ERROR.getMessage()),
+            extractSqlErrorMessage(ex),
+            null
+    );
   }
 
   private ResponseEntity<ErrorResponse> createErrorResponse(ErrorCode errorCode, Set<String> messages, String providedValue, Set<String> acceptedValues) {
@@ -90,13 +107,36 @@ public class GlobalExceptionHandler {
   }
 
   private Set<String> getAcceptedValues(String errorMessage) {
-    String field = extractInvalidValue(errorMessage);
+    String field = extractFieldName(errorMessage).toUpperCase();
 
-    if (errorMessage.contains("Role")) {
-      return Set.of("ADMIN", "USER", "GUEST");
-    } else if (errorMessage.contains("Gender")) {
-      return Set.of("MALE", "FEMALE", "OTHER");
+    return switch (field) {
+      case "ROLE" -> Field.ROLE.getValues();
+      case "GENDER" -> Field.GENDER.getValues();
+      case "PHONE_TYPE" -> Field.PHONE_TYPE.getValues();
+      default -> Set.of();
+    };
+  }
+
+  private String extractConstraintValue(DataIntegrityViolationException ex) {
+    String message = ex.getMessage();
+    if (message.contains("Duplicate entry")) {
+      return message.split("'")[1];
     }
-    return Set.of();
+    return "unknown_field";
+  }
+
+  private String extractFieldName(String errorMessage) {
+    if (errorMessage == null) return "unknown";
+
+    Pattern pattern = Pattern.compile("(?i)(field|property|type)\\s*['\"]?(\\w+)['\"]?");
+    Matcher matcher = pattern.matcher(errorMessage);
+
+    return matcher.find() ? matcher.group(2) : "unknown";
+  }
+
+  private String extractSqlErrorMessage(UncategorizedSQLException ex) {
+    SQLException sqlException = ex.getSQLException();
+
+    return sqlException != null ? sqlException.getMessage() : "Unknown SQL error";
   }
 }
