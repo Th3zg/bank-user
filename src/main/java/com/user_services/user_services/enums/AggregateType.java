@@ -1,5 +1,8 @@
 package com.user_services.user_services.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum AggregateType {
   PERSON("person"),
   CLIENT("client"),
@@ -10,5 +13,4 @@ public enum AggregateType {
 
   AggregateType(String value) { this.value = value; }
 
-  public String getValue() { return value; }
 }
