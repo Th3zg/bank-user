@@ -3,12 +3,16 @@ package com.user_services.user_services.services;
 import com.couchbase.client.java.Collection;
 import com.couchbase.client.java.json.JsonObject;
 import com.user_services.user_services.events.PersonCreatedEvent;
+import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class PersonProjectionService {
+  private final Logger logger = LoggerFactory.getLogger(PersonProjectionService.class);
   private final Collection collection;
 
   public void CreatePersonDocument(PersonCreatedEvent event) {
@@ -23,6 +27,12 @@ public class PersonProjectionService {
             .put("created_at", event.createdAt().toString());
 
     String id = "person::" + event.personId();
-    collection.upsert(id, document);
+    Try.run(() -> collection.upsert(id, document))
+            .onFailure(this::handleCouchbaseError);
+  }
+
+  private void handleCouchbaseError(Throwable throwable) {
+    logger.error("Error al proyectar documento en Couchbase: {}", throwable.getMessage(), throwable);
+    // alertas, reintentos, etc. (pendiente)
   }
 }
