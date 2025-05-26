@@ -25,7 +25,7 @@ public class CouchbaseConfig {
 
   @Bean
   public Cluster couchbaseCluster() {
-    return Cluster.connect("localhost", "admin", "password");
+    return Cluster.connect(connectionString, username, password);
   }
 
   @Bean
