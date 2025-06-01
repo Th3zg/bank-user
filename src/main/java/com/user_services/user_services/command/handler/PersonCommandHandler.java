@@ -44,7 +44,10 @@ public class PersonCommandHandler {
       return Try.of(() -> createPersonEntity(command))
               .flatMap(person -> persistPerson(person, status))
               .flatMap(person -> createRelatedEntities(person, command, status))
-              .fold(err -> Result.failure("Error: " + err.getMessage()),
+              .fold(err -> {
+                status.setRollbackOnly();
+                return Result.failure("Error: " + err.getMessage());
+                      },
                       success -> Result.success());
     });
   }
@@ -116,7 +119,12 @@ public class PersonCommandHandler {
             aggregateId,
             eventType,
             payload,
-            OutboxStatus.PENDING
+            OutboxStatus.PENDING,
+            null,
+            0,
+            null,
+            null,
+            null
     );
   }
 
@@ -125,7 +133,7 @@ public class PersonCommandHandler {
     createOutboxEvent(
             AggregateType.PERSON,
             personId,
-            EventType.PERSON_CREATED_EVENT,
+            EventType.PERSON_CREATED,
             new PersonCreatedEvent(
                     personId,
                     person.getFirstName(),
@@ -146,7 +154,7 @@ public class PersonCommandHandler {
     createOutboxEvent(
             AggregateType.CLIENT,
             clientId,
-            EventType.CLIENT_CREATED_EVENT,
+            EventType.CLIENT_REGISTERED,
             new ClientCreatedEvent(
                     client.getId(),
                     client.getPersonId(),
@@ -170,7 +178,7 @@ public class PersonCommandHandler {
     createOutboxEvent(
             AggregateType.ADDRESS,
             addressId,
-            EventType.ADDRESS_CREATED_EVENT,
+            EventType.ADDRESS_CREATED,
             new AddressCreatedEvent(
                     address.getAddressId(),
                     address.getPersonId(),
@@ -191,7 +199,7 @@ public class PersonCommandHandler {
     createOutboxEvent(
             AggregateType.PHONE,
             phoneId,
-            EventType.PHONE_CREATED_EVENT,
+            EventType.PHONE_ADDED,
             new PhoneCreatedEvent(
                     phone.getPhoneId(),
                     phone.getPersonId(),
