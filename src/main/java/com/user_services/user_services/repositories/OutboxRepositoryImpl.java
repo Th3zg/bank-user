@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
@@ -44,18 +45,18 @@ public class OutboxRepositoryImpl implements OutboxRepository {
   @Override
   public Try<Void> insert(OutboxEvent event) {
     String sql = """
-            INSERT INTO outbox_events (aggregate_type, aggregate_id, type, payload, status, created_at)
-            VALUES (?, ?, ?, ?::jsonb), ?, ?)
+            INSERT INTO outbox_events (aggregate_type, aggregate_id, type, data, status)
+            VALUES (?, ?, ?, ?::jsonb), ?)
         """;
 
-    String payloadJson = Json.convertPayloadToJson(event.payload());
+    String dataJson = Json.convertPayloadToJson(event.data());
 
     return Try.run(() -> {
       jdbcTemplate.update(sql,
               event.aggregate_type(),
               event.aggregate_id(),
               event.type(),
-              event.payload(),
+              event.data(),
               event.status());
     });
   }
@@ -63,7 +64,13 @@ public class OutboxRepositoryImpl implements OutboxRepository {
   @Override
   public Try<List<OutboxEvent>> findPendingEvents() {
     String sql = """
-            SELECT * FROM outbox_events
+            SELECT id,
+                   aggregate_type,
+                   aggregate_id,
+                   event_type,
+                   data,
+                   status
+            FROM outbox_events
             WHERE status = PENDING
             ORDER BY created_at ASC
             """;
@@ -74,8 +81,14 @@ public class OutboxRepositoryImpl implements OutboxRepository {
                     AggregateType.valueOf(rs.getString("aggregate_type")),
                     rs.getLong("aggregate_id"),
                     EventType.valueOf(rs.getString("type")),
-                    rs.getObject("payload"),
-                    OutboxStatus.valueOf(rs.getString("status"))
+                    rs.getObject("data"),
+                    OutboxStatus.valueOf(rs.getString("status")),
+                    (UUID) rs.getObject("event_id"),
+                    rs.getInt("attempts"),
+                    rs.getTimestamp("processed_at") != null ?
+                            rs.getTimestamp("processed_at").toLocalDateTime() : null,
+                    rs.getTimestamp("created_at").toLocalDateTime(),
+                    rs.getString("last_error")
             ))
     )
     .onFailure(err -> logger.error("Technical error in OutboxRepository {}", err.getMessage()));
