@@ -12,7 +12,7 @@ public record OutboxEvent(
         AggregateType aggregate_type,
         long aggregate_id,
         EventType type,
-        Object payload, // data (JSONB)
+        Object data, // data (JSONB)
         OutboxStatus status,
         UUID eventId,
         int attempts,
