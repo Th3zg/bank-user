@@ -83,12 +83,11 @@ public class OutboxRepositoryImpl implements OutboxRepository {
                     EventType.valueOf(rs.getString("type")),
                     rs.getObject("data"),
                     OutboxStatus.valueOf(rs.getString("status")),
-                    (UUID) rs.getObject("event_id"),
-                    rs.getInt("attempts"),
-                    rs.getTimestamp("processed_at") != null ?
-                            rs.getTimestamp("processed_at").toLocalDateTime() : null,
-                    rs.getTimestamp("created_at").toLocalDateTime(),
-                    rs.getString("last_error")
+                    null,
+                    0,
+                    null,
+                    null,
+                    null
             ))
     )
     .onFailure(err -> logger.error("Technical error in OutboxRepository {}", err.getMessage()));
