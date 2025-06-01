@@ -1,4 +1,4 @@
-package com.user_services.user_services.services;
+package com.user_services.user_services.kafka.outbox;
 
 import com.user_services.user_services.outbox.OutboxEvent;
 import com.user_services.user_services.repositories.OutboxRepositoryImpl;
@@ -19,14 +19,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OutboxProcessor {
   private final Logger logger  = LoggerFactory.getLogger(OutboxProcessor.class);
-  private final OutboxRepositoryImpl outboxRepository;
+  private final OutboxRepositoryImpl outboxRepositoryImpl;
   private final KafkaTemplate<String, Object> kafkaTemplate;
   private final TransactionTemplate transactionTemplate;
 
   @Scheduled(fixedDelay = 5000)
   public Result<Void> processOutboxEvents() {
     return transactionTemplate.execute(status ->
-            outboxRepository.findPendingEvents()
+            outboxRepositoryImpl.findPendingEvents()
                     .fold(error -> {
                       logger.error("Error fetching events", error);
                       status.setRollbackOnly();
@@ -40,25 +40,22 @@ public class OutboxProcessor {
             .map(this::processSingleEvent)
             .toList();
 
-    List<String> errors = processingResults.stream()
-            .filter(Try::isFailure)
-            .map(e -> e.getCause().getMessage())
-            .toList();
-
-    if (errors.isEmpty()) {
+    boolean anyFailure = processingResults.stream().anyMatch(Try::isFailure);
+    if (anyFailure) {
       status.setRollbackOnly();
-      return Result.failure(errors);
+      return Result.failure(processingResults.stream()
+              .filter(Try::isFailure)
+              .map(t -> t.getCause().getMessage())
+              .toList());
     }
-
     return Result.success();
   }
 
   private Try<Void> processSingleEvent(OutboxEvent event) {
     return Try.run(() ->
-            kafkaTemplate.send(event.type(), event.payload()).get()
-    )
-    .flatMap((v) -> outboxRepository.markAsProcessed(event.id()))
-    .onFailure(ex ->
-            logger.error("Failed processing event {}", event.id(), ex));
+            kafkaTemplate.send(String.valueOf(event.type()), event.data()).get())
+            .flatMap((v) -> outboxRepositoryImpl.markAsProcessed(event.id()))
+            .onFailure(ex ->
+                    logger.error("Failed processing event {}", event.id(), ex));
   }
 }
