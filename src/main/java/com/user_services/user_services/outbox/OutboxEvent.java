@@ -16,6 +16,7 @@ public record OutboxEvent(
         OutboxStatus status,
         UUID eventId,
         int attempts,
-        LocalDateTime processed_at,
+        LocalDateTime processedAt,
+        LocalDateTime createdAt,
         String last_error
 ) {}
