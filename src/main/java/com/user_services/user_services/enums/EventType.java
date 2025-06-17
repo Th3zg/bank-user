@@ -4,11 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum EventType {
-  PERSON_CREATED_EVENT("personCreatedEvent"),
-  CLIENT_CREATED_EVENT("clientCreatedEvent"),
-  PHONE_CREATED_EVENT("phoneCreatedEvent"),
-  ADDRESS_CREATED_EVENT("addressCreatedEvent"),
-  PERSON_CREATED("person_created"),
+  PERSON_CREATED("personCreatedEvent"),
   PERSON_UPDATED("person_updated"),
   PERSON_DEACTIVATED("person_deactivated"),
   CLIENT_REGISTERED("client_registered"),
