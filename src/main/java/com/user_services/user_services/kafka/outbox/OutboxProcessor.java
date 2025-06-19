@@ -1,10 +1,13 @@
 package com.user_services.user_services.kafka.outbox;
 
+import com.user_services.user_services.kafka.services.KafkaMessageService;
+import com.user_services.user_services.kafka.services.KafkaProducerService;
 import com.user_services.user_services.outbox.OutboxEvent;
 import com.user_services.user_services.repositories.OutboxRepositoryImpl;
 import com.user_services.user_services.util.Result;
 import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -17,19 +20,20 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class OutboxProcessor {
+public class OutboxProcessor { // Producer
   private final Logger logger  = LoggerFactory.getLogger(OutboxProcessor.class);
   private final OutboxRepositoryImpl outboxRepositoryImpl;
   private final KafkaTemplate<String, Object> kafkaTemplate;
   private final TransactionTemplate transactionTemplate;
+  private final KafkaMessageService kafkaMessageService;
+  private final KafkaProducerService kafkaProducerService;
 
   @Scheduled(fixedDelay = 5000)
   public Result<Void> processOutboxEvents() {
     return transactionTemplate.execute(status ->
-            outboxRepositoryImpl.findPendingEvents()
+            outboxRepositoryImpl.findPendingEvents() // agregar, quizas, un limite para no sobrecargar.
                     .fold(error -> {
                       logger.error("Error fetching events", error);
-                      status.setRollbackOnly();
                       return Result.failure("Fetch error: " + error.getMessage());
                             },
                             events -> processEvents(events, status)));
@@ -42,7 +46,6 @@ public class OutboxProcessor {
 
     boolean anyFailure = processingResults.stream().anyMatch(Try::isFailure);
     if (anyFailure) {
-      status.setRollbackOnly();
       return Result.failure(processingResults.stream()
               .filter(Try::isFailure)
               .map(t -> t.getCause().getMessage())
@@ -51,11 +54,9 @@ public class OutboxProcessor {
     return Result.success();
   }
 
-  private Try<Void> processSingleEvent(OutboxEvent event) {
+  private Try<Void> processSingleEvent(final OutboxEvent event) {
     return Try.run(() ->
-            kafkaTemplate.send(String.valueOf(event.type()), event.data()).get())
-            .flatMap((v) -> outboxRepositoryImpl.markAsProcessed(event.id()))
-            .onFailure(ex ->
-                    logger.error("Failed processing event {}", event.id(), ex));
+            kafkaProducerService.sendEvent(event))
+            .onFailure(ex -> logger.error("Failed to send event: {}", event.id(), ex));
   }
 }
