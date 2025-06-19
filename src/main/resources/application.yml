@@ -28,8 +28,9 @@ spring:
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      enable-auto-commit: false # Confirmación Manual de Offsets
       properties:
-        spring.json.trusted.packages: "com.yourbank.events"
+        spring.json.trusted.packages: "" # com.yourbank.events
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -51,3 +52,19 @@ logging:
   level:
     root: INFO
     org.springframework.web: DEBUG
+
+resilience4j:
+  retry:
+    instances:
+      kafkaSenderRetry:
+        max-attempts: 3
+        wait-duration: 2s
+
+  circuitbreaker:
+    instances:
+      kafkaSenderBreaker:
+        register-health-indicator: true
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
