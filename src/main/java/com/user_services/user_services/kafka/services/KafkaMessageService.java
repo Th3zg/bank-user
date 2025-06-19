@@ -3,8 +3,6 @@ package com.user_services.user_services.kafka.services;
 import com.user_services.user_services.kafka.interfaces.KafkaSendCallback;
 import com.user_services.user_services.outbox.OutboxEvent;
 import com.user_services.user_services.repositories.OutboxRepositoryImpl;
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.retry.Retry;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
@@ -18,10 +16,8 @@ public class KafkaMessageService implements KafkaSendCallback {
   private final Logger logger = LoggerFactory.getLogger(KafkaMessageService.class);
 
   private final OutboxRepositoryImpl outboxRepository;
-  private final Retry kafkaRetry;
-  private final CircuitBreaker kafkaCircuitBreaker;
 
-  public void onSuccess(OutboxEvent event, SendResult<String, Object> result) { // logeo, metricas,etc
+  public void onSuccess(OutboxEvent event, SendResult<String, OutboxEvent> result) { // logeo, metricas,etc
     logger.info("Successfully sent event {} to Kafka.", event.id());
     result.getRecordMetadata();
   }
