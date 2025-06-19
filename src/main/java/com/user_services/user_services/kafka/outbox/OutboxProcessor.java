@@ -7,7 +7,6 @@ import com.user_services.user_services.repositories.OutboxRepositoryImpl;
 import com.user_services.user_services.util.Result;
 import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
