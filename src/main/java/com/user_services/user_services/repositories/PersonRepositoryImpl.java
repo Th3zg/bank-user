@@ -1,5 +1,6 @@
 package com.user_services.user_services.repositories;
 
+import com.user_services.user_services.enums.DatabaseError;
 import com.user_services.user_services.exception.DatabaseErrorExceptionMapper;
 import com.user_services.user_services.model.entity.Person;
 import com.user_services.user_services.repositories.interfaces.PersonRepository;
@@ -46,9 +47,10 @@ public class PersonRepositoryImpl implements PersonRepository {
       );
       logger.info("Person created with ID: {}", personId);
       return person;
-    }).onFailure(ex -> {
+    }).onFailure(DataAccessException.class, ex -> {
       logger.error("Error creating person", ex);
-      DatabaseErrorExceptionMapper.fromException((DataAccessException) ex);
-    });
+      DatabaseError error = DatabaseErrorExceptionMapper.fromException(ex);
+      logger.error("Mapped database error: {}", error);
+    }).onFailure(ex -> logger.error("Unexpected error creating person", ex));
   }
 }
