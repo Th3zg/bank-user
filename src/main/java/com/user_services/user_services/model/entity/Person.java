@@ -19,6 +19,7 @@ public final class Person {
   private final String profileImageUrl;
   private final CommunicationPreference communicationPreference;
   private final boolean termsAccepted;
+  private boolean twoFactorEnabled;
   private final String bio;
   private final LocalDateTime createdAt;
   private final LocalDateTime updatedAt;
@@ -33,6 +34,7 @@ public final class Person {
     this.gender = builder.gender;
     this.profileImageUrl = builder.profileImageUrl;
     this.communicationPreference = builder.communicationPreference;
+    this.twoFactorEnabled = builder.twoFactorEnabled;
     this.termsAccepted = builder.termsAccepted;
     this.bio = builder.bio;
     this.createdAt = builder.createdAt;
@@ -50,6 +52,7 @@ public final class Person {
     private String profileImageUrl;
     private CommunicationPreference communicationPreference;
     private boolean termsAccepted;
+    private boolean twoFactorEnabled = false;
     private String bio;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -64,6 +67,7 @@ public final class Person {
     public Builder setProfileImageUrl(String profileImageUrl) { this.profileImageUrl = profileImageUrl; return this; }
     public Builder setCommunicationPreference(CommunicationPreference communicationPreference) { this.communicationPreference = communicationPreference; return this; }
     public Builder setTermsAccepted(boolean termsAccepted) { this.termsAccepted = termsAccepted; return this; }
+    public Builder setTwoFactorEnabled(boolean twoFactorEnabled) { this.twoFactorEnabled = twoFactorEnabled; return this; }
     public Builder setBio(String bio) { this.bio = bio; return this; }
     public Builder setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; return this; }
     public Builder setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; return this; }
