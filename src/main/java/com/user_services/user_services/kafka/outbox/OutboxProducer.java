@@ -12,15 +12,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class OutboxProcessor { // Producer
-  private final Logger logger  = LoggerFactory.getLogger(OutboxProcessor.class);
+public class OutboxProducer { // Producer
+  private final Logger logger  = LoggerFactory.getLogger(OutboxProducer.class);
   private final OutboxRepositoryImpl outboxRepositoryImpl;
   private final KafkaTemplate<String, Object> kafkaTemplate;
   private final TransactionTemplate transactionTemplate;
@@ -29,16 +28,15 @@ public class OutboxProcessor { // Producer
 
   @Scheduled(fixedDelay = 5000)
   public Result<Void> processOutboxEvents() {
-    return transactionTemplate.execute(status ->
-            outboxRepositoryImpl.findPendingEvents() // agregar, quizas, un limite para no sobrecargar.
-                    .fold(error -> {
+    return outboxRepositoryImpl.findPendingEvents() // agregar, quizas, un limite para no sobrecargar.
+            .fold(error -> {
                       logger.error("Error fetching events", error);
                       return Result.failure("Fetch error: " + error.getMessage());
-                            },
-                            events -> processEvents(events, status)));
+                    },
+                    this::processEvents);
   }
 
-  private Result<Void> processEvents(List<OutboxEvent> events, TransactionStatus status) {
+  private Result<Void> processEvents(List<OutboxEvent> events) {
     List<Try<Void>> processingResults = events.stream()
             .map(this::processSingleEvent)
             .toList();
