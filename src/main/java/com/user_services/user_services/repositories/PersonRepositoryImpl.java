@@ -26,7 +26,7 @@ public class PersonRepositoryImpl implements PersonRepository {
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING person_id, first_name,
             last_name, date_birth, email, password,
             gender, profile_image_url, communication_preference,
-            terms_accepted, bio
+            terms_accepted
             """;
 
     return Try.of(() -> {
