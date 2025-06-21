@@ -26,8 +26,9 @@ public class PersonProjectionService {
             .put("gender", event.gender())
             .put("created_at", event.createdAt().toString());
 
+    // insert data
     String id = "person::" + event.personId();
-    Try.run(() -> collection.upsert(id, document))
+    Try.run(() -> collection.insert(id, document))
             .onFailure(this::handleCouchbaseError);
   }
 
