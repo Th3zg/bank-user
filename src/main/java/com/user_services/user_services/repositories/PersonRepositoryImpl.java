@@ -42,7 +42,7 @@ public class PersonRepositoryImpl implements PersonRepository {
               person.getProfileImageUrl(),
               person.getCommunicationPreference(),
               person.isTermsAccepted(),
-              person.getBio()
+              null
       );
       logger.info("Person created with ID: {}", personId);
       return person;
