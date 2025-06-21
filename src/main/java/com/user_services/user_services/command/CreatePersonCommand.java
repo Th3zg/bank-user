@@ -41,7 +41,7 @@ public record CreatePersonCommand(
         @AssertTrue(message = "You must accept the terms")
         @JsonProperty("terms_accepted") boolean termsAccepted,
 
-        @JsonProperty("tow_factor_enable") boolean twoFactorEnabled,
+//        @JsonProperty("two_factor_enabled") boolean twoFactorEnabled,
 
         @NotEmpty(message = "client is required")
         @JsonProperty("client") CreateClientCommand client,
