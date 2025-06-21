@@ -13,8 +13,8 @@ import com.user_services.user_services.model.entity.Client;
 import com.user_services.user_services.model.entity.Person;
 import com.user_services.user_services.model.entity.Phone;
 import com.user_services.user_services.outbox.OutboxEvent;
+import com.user_services.user_services.repositories.OutboxRepositoryImpl;
 import com.user_services.user_services.repositories.PersonRepositoryImpl;
-import com.user_services.user_services.repositories.interfaces.OutboxRepository;
 import com.user_services.user_services.util.Result;
 import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +36,7 @@ public class PersonCommandHandler {
   private final ClientCommandHandler clientCommandHandler;
   private final AddressCommandHandler addressCommandHandler;
   private final PhoneCommandHandler phoneCommandHandler;
-  private final OutboxRepository outboxRepository;
+  private final OutboxRepositoryImpl outboxRepository;
   private final ApplicationEventPublisher eventPublisher;
 
   public Result<Void> handler(CreatePersonCommand command) {
