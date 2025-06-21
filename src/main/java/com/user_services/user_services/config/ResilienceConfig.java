@@ -17,5 +17,16 @@ public class ResilienceConfig {
   public CircuitBreaker kafkaCircuitBreaker() {
     return CircuitBreaker.ofDefaults("kafkaSenderBreaker");
   }
+
+  @Bean
+  public Retry personProjectionRetry() {
+    return Retry.ofDefaults("personProjectionRetry");
+  }
+
+  @Bean
+  public CircuitBreaker personProjectionBreaker() {
+    return CircuitBreaker.ofDefaults("personProjectionBreaker");
+  }
+
 }
 
