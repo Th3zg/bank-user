@@ -9,7 +9,7 @@ public final class Phone {
   private final Long phoneId;
   private final Long personId;
   private final String phoneNumber;
-  private final PhoneType phoneType; // Enum para phone_type
+  private final PhoneType phoneType;
   private final ZonedDateTime createdAt;
   private final ZonedDateTime updatedAt;
 
