@@ -19,7 +19,7 @@ public final class Person {
   private final String profileImageUrl;
   private final CommunicationPreference communicationPreference;
   private final boolean termsAccepted;
-  private boolean twoFactorEnabled;
+  private final boolean twoFactorEnabled;
   private final String bio;
   private final LocalDateTime createdAt;
   private final LocalDateTime updatedAt;
