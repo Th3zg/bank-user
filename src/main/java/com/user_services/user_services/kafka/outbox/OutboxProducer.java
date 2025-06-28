@@ -1,6 +1,5 @@
 package com.user_services.user_services.kafka.outbox;
 
-import com.user_services.user_services.kafka.services.KafkaMessageService;
 import com.user_services.user_services.kafka.services.KafkaProducerService;
 import com.user_services.user_services.outbox.OutboxEvent;
 import com.user_services.user_services.repositories.OutboxRepositoryImpl;
@@ -9,21 +8,16 @@ import io.vavr.control.Try;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class OutboxProducer { // Producer
-  private final Logger logger  = LoggerFactory.getLogger(OutboxProducer.class);
+public class OutboxProducer {
+  private final Logger logger = LoggerFactory.getLogger(OutboxProducer.class);
   private final OutboxRepositoryImpl outboxRepositoryImpl;
-  private final KafkaTemplate<String, Object> kafkaTemplate;
-  private final TransactionTemplate transactionTemplate;
-  private final KafkaMessageService kafkaMessageService;
   private final KafkaProducerService kafkaProducerService;
 
   @Scheduled(fixedDelay = 5000)
