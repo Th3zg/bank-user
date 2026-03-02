@@ -1,6 +1,7 @@
 package com.user_services.user_services.model.entity;
 
 import com.user_services.user_services.enums.RiskLevel;
+import com.user_services.user_services.enums.StateMachine;
 import lombok.Getter;
 
 import java.math.BigDecimal;
@@ -20,6 +21,7 @@ public final class Client {
   private final BigDecimal monthlyIncome;
   private final String occupation;
   private final String maritalStatus;
+  private final StateMachine stateMachine;
 
   public Client(Builder builder) {
     this.id = builder.id;
@@ -35,6 +37,7 @@ public final class Client {
     this.monthlyIncome = builder.monthlyIncome;
     this.occupation = builder.occupation;
     this.maritalStatus = builder.maritalStatus;
+    this.stateMachine = builder.stateMachine;
   }
 
   public static class Builder {
@@ -51,6 +54,7 @@ public final class Client {
     private BigDecimal monthlyIncome;
     private String occupation;
     private String maritalStatus;
+    private StateMachine stateMachine;
 
     public Builder setId(Long id) { this.id = id; return this; }
     public Builder setPersonId(Long personId) { this.personId = personId; return this; }
@@ -65,6 +69,7 @@ public final class Client {
     public Builder setMonthlyIncome(BigDecimal monthlyIncome) { this.monthlyIncome = monthlyIncome; return this; }
     public Builder setOccupation(String occupation) { this.occupation = occupation; return this; }
     public Builder setMaritalStatus(String maritalStatus) { this.maritalStatus  = maritalStatus; return this; }
+    public Builder setStateMachine(StateMachine stateMachine) { this.stateMachine = stateMachine; return this; }
 
     public Client build() {
       return new Client(this);
